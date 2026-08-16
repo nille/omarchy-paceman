@@ -168,6 +168,15 @@ Item {
       compare(Model.toggleFavorite("One, one", "Two"), "One, Two")
     }
 
+    function test_favorite_list_can_add_and_remove_names() {
+      compare(Model.addFavorite("One, Two", "Three"), "One, Two, Three")
+      compare(Model.addFavorite("One, Two", "two"), "One, Two")
+      compare(Model.removeFavorite("One, Two, Three", "TWO"),
+              "One, Three")
+      compare(Model.favoriteDisplayNames("One, one, TWO").join(","),
+              "One,TWO")
+    }
+
     function test_setting_values_are_json_encoded() {
       var stringArgs = Model.settingArgs("nille.paceman", "favoriteRunners", "A, B")
       compare(stringArgs[stringArgs.length - 2], "\"A, B\"")

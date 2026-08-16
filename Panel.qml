@@ -98,10 +98,26 @@ Panel {
 
   function toggleFavorite(run) {
     if (!run) return
-    pendingFavoriteRunners = Model.toggleFavorite(
-      shownFavoriteRunners, run.nickname)
-    persistSetting("favoriteRunners", pendingFavoriteRunners)
+    setFavoriteRunners(Model.toggleFavorite(
+      shownFavoriteRunners, run.nickname))
+  }
+
+  function setFavoriteRunners(value) {
+    var next = String(value || "")
+    if (Model.normalizeFavorites(next).join(",")
+        === Model.normalizeFavorites(shownFavoriteRunners).join(","))
+      return
+    pendingFavoriteRunners = next
+    persistSetting("favoriteRunners", next)
     reparseCached()
+  }
+
+  function addFavoriteRunner(nickname) {
+    setFavoriteRunners(Model.addFavorite(shownFavoriteRunners, nickname))
+  }
+
+  function removeFavoriteRunner(nickname) {
+    setFavoriteRunners(Model.removeFavorite(shownFavoriteRunners, nickname))
   }
 
   onConfiguredRefreshIntervalSecChanged: {
@@ -464,6 +480,7 @@ Panel {
       anchors.fill: parent
       blocked: versionDropdown.popupOpen
         || refreshIntervalPopup.opened
+        || favoritesPopup.opened
         || thresholdsPopup.opened
 
       onMoveRequested: function(dx, dy) {
@@ -590,9 +607,13 @@ Panel {
                   anchors.fill: parent
                   hoverEnabled: true
                   cursorShape: Qt.PointingHandCursor
-                  onClicked: refreshIntervalPopup.opened
-                    ? refreshIntervalPopup.close()
-                    : refreshIntervalPopup.open()
+                  onClicked: {
+                    favoritesPopup.close()
+                    thresholdsPopup.close()
+                    refreshIntervalPopup.opened
+                      ? refreshIntervalPopup.close()
+                      : refreshIntervalPopup.open()
+                  }
                 }
 
                 Popup {
@@ -667,6 +688,199 @@ Panel {
               spacing: Style.spacing.xs
 
               PanelActionButton {
+                id: favoritesAction
+                iconText: "★"
+                tooltipText: "Manage favorite runners"
+                foreground: root.foreground
+                fontFamily: root.fontFamily
+                onClicked: {
+                  refreshIntervalPopup.close()
+                  thresholdsPopup.close()
+                  favoritesPopup.opened
+                    ? favoritesPopup.close() : favoritesPopup.open()
+                }
+
+                Popup {
+                  id: favoritesPopup
+                  x: favoritesAction.width - width
+                  y: favoritesAction.height + Style.spacing.xs
+                  width: Style.space(280)
+                  padding: Style.spacing.md
+                  focus: true
+                  closePolicy: Popup.CloseOnEscape
+                    | Popup.CloseOnPressOutsideParent
+                  onOpened: favoriteInput.forceActiveFocus()
+                  onClosed: {
+                    favoriteInput.text = ""
+                    Qt.callLater(function() {
+                      keyCatcher.forceActiveFocus()
+                    })
+                  }
+
+                  background: BorderSurface {
+                    color: Color.popups.background
+                    borderSpec: Border.controlSpec(
+                      "normal", root.foreground, root.accent)
+                    radius: Style.cornerRadius
+                  }
+
+                  contentItem: Column {
+                    id: favoritesColumn
+                    width: favoritesPopup.width
+                      - favoritesPopup.leftPadding
+                      - favoritesPopup.rightPadding
+                    spacing: Style.spacing.sm
+
+                    Text {
+                      text: "FAVORITE RUNNERS"
+                      color: root.dim
+                      font.family: root.fontFamily
+                      font.pixelSize: Style.font.caption
+                      font.bold: true
+                    }
+
+                    Item {
+                      id: favoriteAlertsRow
+                      property bool enabledValue:
+                        root.setting("notifyFavorites", true) !== false
+                      width: parent.width
+                      implicitHeight: Math.max(favoriteAlertsLabel.implicitHeight,
+                                               favoriteAlertsSwitch.implicitHeight)
+
+                      Text {
+                        id: favoriteAlertsLabel
+                        anchors.left: parent.left
+                        anchors.right: favoriteAlertsSwitch.left
+                        anchors.rightMargin: Style.spacing.md
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Favorite runner alerts"
+                        color: root.foreground
+                        font.family: root.fontFamily
+                        font.pixelSize: Style.font.bodySmall
+                      }
+
+                      ToggleSwitch {
+                        id: favoriteAlertsSwitch
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        checked: favoriteAlertsRow.enabledValue
+                        foreground: root.foreground
+                        accent: root.accent
+                        onToggled: {
+                          favoriteAlertsRow.enabledValue =
+                            !favoriteAlertsRow.enabledValue
+                          root.persistSetting(
+                            "notifyFavorites",
+                            favoriteAlertsRow.enabledValue)
+                        }
+                      }
+                    }
+
+                    PanelSeparator {
+                      width: parent.width
+                      foreground: root.foreground
+                    }
+
+                    Item {
+                      width: parent.width
+                      implicitHeight: Math.max(favoriteInput.implicitHeight,
+                                               addFavoriteButton.implicitHeight)
+
+                      TextField {
+                        id: favoriteInput
+                        anchors.left: parent.left
+                        anchors.right: addFavoriteButton.left
+                        anchors.rightMargin: Style.spacing.sm
+                        anchors.verticalCenter: parent.verticalCenter
+                        placeholderText: "Minecraft username"
+                        foreground: root.foreground
+                        accent: root.accent
+                        font.family: root.fontFamily
+                        font.pixelSize: Style.font.bodySmall
+                        onAccepted: {
+                          var name = String(text).trim()
+                          if (name === "") return
+                          root.addFavoriteRunner(name)
+                          text = ""
+                        }
+                      }
+
+                      PanelActionButton {
+                        id: addFavoriteButton
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        iconText: "\u{F0415}"
+                        tooltipText: "Add favorite runner"
+                        enabled: String(favoriteInput.text).trim() !== ""
+                        foreground: root.foreground
+                        fontFamily: root.fontFamily
+                        onClicked: {
+                          var name = String(favoriteInput.text).trim()
+                          if (name === "") return
+                          root.addFavoriteRunner(name)
+                          favoriteInput.text = ""
+                          favoriteInput.forceActiveFocus()
+                        }
+                      }
+                    }
+
+                    Text {
+                      width: parent.width
+                      visible: favoritesList.count === 0
+                      text: "No favorite runners"
+                      color: root.dim
+                      font.family: root.fontFamily
+                      font.pixelSize: Style.font.bodySmall
+                    }
+
+                    ListView {
+                      id: favoritesList
+                      width: parent.width
+                      height: Math.min(contentHeight, Style.space(220))
+                      clip: true
+                      spacing: Style.spacing.xs
+                      boundsBehavior: Flickable.StopAtBounds
+                      model: Model.favoriteDisplayNames(
+                        root.shownFavoriteRunners)
+
+                      delegate: Item {
+                        id: favoriteEntry
+                        required property string modelData
+                        width: favoritesList.width
+                        height: Math.max(favoriteName.implicitHeight,
+                                         removeFavoriteButton.implicitHeight)
+
+                        Text {
+                          id: favoriteName
+                          anchors.left: parent.left
+                          anchors.right: removeFavoriteButton.left
+                          anchors.rightMargin: Style.spacing.sm
+                          anchors.verticalCenter: parent.verticalCenter
+                          text: favoriteEntry.modelData
+                          color: root.foreground
+                          font.family: root.fontFamily
+                          font.pixelSize: Style.font.bodySmall
+                          elide: Text.ElideRight
+                        }
+
+                        PanelActionButton {
+                          id: removeFavoriteButton
+                          anchors.right: parent.right
+                          anchors.verticalCenter: parent.verticalCenter
+                          iconText: "\u{F0156}"
+                          tooltipText: "Remove favorite runner"
+                          foreground: root.foreground
+                          fontFamily: root.fontFamily
+                          onClicked: root.removeFavoriteRunner(
+                            favoriteEntry.modelData)
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+
+              PanelActionButton {
                 id: thresholdsAction
                 iconText: "\u{F009A}"
                 tooltipText: "Notification thresholds"
@@ -674,6 +888,7 @@ Panel {
                 fontFamily: root.fontFamily
                 onClicked: {
                   refreshIntervalPopup.close()
+                  favoritesPopup.close()
                   thresholdsPopup.opened
                     ? thresholdsPopup.close() : thresholdsPopup.open()
                 }

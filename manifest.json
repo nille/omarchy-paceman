@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "nille.paceman",
   "name": "PaceMan",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "nille",
   "license": "MIT",
   "description": "Follow live Minecraft speedrunning paces from PaceMan.gg, with favorite-runner and split-threshold notifications.",

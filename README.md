@@ -33,6 +33,8 @@ The widget reads PaceMan's public liveruns endpoint directly from QML.
 - Click the freshness text to set the automatic refresh interval
   (`2–60` seconds), or use the widget settings.
 - Use the bell tool to edit notification thresholds for every standard split.
+- Use the header star tool to enable or disable favorite-runner alerts, add
+  usernames manually, review the complete favorites list, and remove runners.
 - Click a run to expand its splits; double-click or use the external-link action
   to open its Twitch stream or PaceMan profile.
 - Collapse expanded run details with the close action in its header.

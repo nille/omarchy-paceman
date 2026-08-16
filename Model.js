@@ -255,6 +255,39 @@ function normalizeFavorites(value) {
   return out
 }
 
+function favoriteDisplayNames(value) {
+  var values = Array.isArray(value) ? value : String(value || "").split(",")
+  var out = []
+  var seen = []
+  for (var i = 0; i < values.length; i++) {
+    var name = String(values[i] || "").trim()
+    var key = name.toLowerCase()
+    if (name !== "" && seen.indexOf(key) < 0) {
+      seen.push(key)
+      out.push(name)
+    }
+  }
+  return out
+}
+
+function addFavorite(value, nickname) {
+  var names = favoriteDisplayNames(value)
+  var name = String(nickname || "").trim()
+  if (name === "") return names.join(", ")
+  var keys = normalizeFavorites(names)
+  if (keys.indexOf(name.toLowerCase()) < 0) names.push(name)
+  return names.join(", ")
+}
+
+function removeFavorite(value, nickname) {
+  var names = favoriteDisplayNames(value)
+  var key = String(nickname || "").trim().toLowerCase()
+  var out = []
+  for (var i = 0; i < names.length; i++)
+    if (names[i].toLowerCase() !== key) out.push(names[i])
+  return out.join(", ")
+}
+
 function toggleFavorite(value, nickname) {
   var raw = Array.isArray(value) ? value.slice() : String(value || "").split(",")
   var out = []
