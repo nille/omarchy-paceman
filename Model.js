@@ -91,6 +91,20 @@ function gameVersionOptions() {
   return out
 }
 
+function thresholdSettings() {
+  var out = []
+  for (var i = 0; i < STANDARD_EVENTS.length; i++) {
+    var eventId = STANDARD_EVENTS[i]
+    var key = THRESHOLD_KEYS[eventId]
+    out.push({
+      key: key,
+      label: EVENT_NAMES[eventId],
+      defaultValue: DEFAULT_THRESHOLDS[key]
+    })
+  }
+  return out
+}
+
 function eventName(eventId) {
   return EVENT_NAMES[String(eventId || "")] || ""
 }
@@ -372,19 +386,26 @@ function buildAlert(run, event, reasons) {
     eventId: event ? event.eventId : "start",
     title: run.nickname + " is on pace",
     body: body,
-    twitch: run.twitch
+    url: run.twitch
+      ? "https://twitch.tv/" + encodeURIComponent(run.twitch)
+      : SITE_URL + "stats/player/" + encodeURIComponent(run.nickname),
+    actionLabel: run.twitch ? "Watch live" : "Open PaceMan profile"
   }
 }
 
 function notificationArgs(alert) {
   if (!alert) return null
   return [
-    "notify-send",
-    "--app-name=PaceMan",
-    "--icon=chronometer",
-    "--expire-time=8000",
+    "sh", "-c",
+    "choice=$(notify-send --app-name=PaceMan --icon=applications-games"
+      + " --expire-time=10000 \"--action=open=$4\" \"$1\" \"$2\");"
+      + " if [ \"$choice\" = open ]; then"
+      + " exec omarchy-launch-browser \"$3\"; fi",
+    "paceman-notification",
     String(alert.title || "PaceMan"),
-    String(alert.body || "")
+    String(alert.body || ""),
+    String(alert.url || SITE_URL),
+    String(alert.actionLabel || "Open PaceMan")
   ]
 }
 

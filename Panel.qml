@@ -311,8 +311,7 @@ Panel {
   readonly property int rowVersion: 0
   readonly property int rowLiveOnly: 1
   readonly property int rowFavoritesOnly: 2
-  readonly property int rowRefreshInterval: 3
-  readonly property int runBase: 4
+  readonly property int runBase: 3
   readonly property int rowCount: runBase + runs.length
 
   function setCursor(index) {
@@ -339,8 +338,6 @@ Panel {
     else if (selectedIndex === rowLiveOnly) setLiveOnly(!shownLiveOnly)
     else if (selectedIndex === rowFavoritesOnly)
       setFavoritesOnly(!shownFavoritesOnly)
-    else if (selectedIndex === rowRefreshInterval)
-      refreshIntervalField.field.forceActiveFocus()
     else {
       var run = selectedRun()
       if (run) expandedWorldId = expandedWorldId === run.worldId
@@ -354,7 +351,6 @@ Panel {
     if (selectedIndex === rowVersion) item = filterRow
     else if (selectedIndex === rowLiveOnly) item = liveToggle
     else if (selectedIndex === rowFavoritesOnly) item = favoritesToggle
-    else if (selectedIndex === rowRefreshInterval) item = refreshIntervalRow
     else {
       var childIndex = selectedIndex - runBase
       if (childIndex >= 0 && childIndex < runRepeater.count)
@@ -418,7 +414,7 @@ Panel {
     // Keep the control's own label alive for its click/tooltip geometry, but
     // render the glyph separately so it always uses the patched icon font.
     text: " "
-    fixedWidth: vertical ? -1 : Style.bar.iconSlot
+    fixedWidth: vertical ? -1 : Style.space(20)
     fixedHeight: vertical ? Style.bar.iconSlot : -1
     foreground: root.bar ? root.bar.barForeground : Color.foreground
     dimmed: root.lastSuccessAt === 0 || root.stale
@@ -464,6 +460,8 @@ Panel {
       id: keyCatcher
       anchors.fill: parent
       blocked: versionDropdown.popupOpen
+        || refreshIntervalPopup.opened
+        || thresholdsPopup.opened
 
       onMoveRequested: function(dx, dy) {
         if (!root.cursorActive) {
@@ -501,25 +499,300 @@ Panel {
           width: scrollArea.availableWidth
           spacing: Style.spacing.panelGap
 
-          PanelHero {
+          Item {
+            id: panelHero
             width: parent.width
-            title: "PaceMan"
-            meta: root.freshness
-            detail: root.allRuns.length + " ACTIVE"
-            foreground: root.foreground
-            fontFamily: root.fontFamily
+            implicitHeight: Math.max(heroIcon.implicitHeight,
+                                     heroLabels.implicitHeight,
+                                     heroActions.implicitHeight)
 
-            iconComponent: Component {
+            Text {
+              id: heroIcon
+              anchors.left: parent.left
+              anchors.verticalCenter: parent.verticalCenter
+              text: Model.barIcon()
+              color: root.foreground
+              font.family: "JetBrainsMono Nerd Font"
+              font.pixelSize: Style.font.display
+            }
+
+            Column {
+              id: heroLabels
+              anchors.left: heroIcon.right
+              anchors.leftMargin: Style.space(14)
+              anchors.right: heroActions.left
+              anchors.rightMargin: Style.space(12)
+              anchors.verticalCenter: parent.verticalCenter
+              spacing: Style.space(2)
+
+              Item {
+                width: parent.width
+                implicitHeight: Math.max(heroTitle.implicitHeight,
+                                         activePill.implicitHeight)
+
+                Text {
+                  id: heroTitle
+                  anchors.left: parent.left
+                  anchors.right: activePill.left
+                  anchors.rightMargin: Style.space(8)
+                  anchors.verticalCenter: parent.verticalCenter
+                  text: "PaceMan"
+                  color: root.foreground
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.title
+                  font.bold: true
+                  elide: Text.ElideRight
+                }
+
+                BorderSurface {
+                  id: activePill
+                  anchors.right: parent.right
+                  anchors.verticalCenter: parent.verticalCenter
+                  implicitWidth: activeText.implicitWidth + Style.space(10)
+                  implicitHeight: activeText.implicitHeight + Style.space(4)
+                  color: "transparent"
+                  borderSpec: Border.controlSpec(
+                    "normal", root.foreground, root.accent)
+                  radius: Style.cornerRadius
+
+                  Text {
+                    id: activeText
+                    anchors.centerIn: parent
+                    text: root.allRuns.length + " ACTIVE"
+                    color: root.dim
+                    font.family: root.fontFamily
+                    font.pixelSize: Style.font.body
+                    font.bold: true
+                  }
+                }
+              }
+
               Text {
-                text: Model.barIcon()
-                color: root.foreground
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Style.font.display
+                id: freshnessLink
+                text: root.freshness.toUpperCase()
+                color: freshnessMouse.containsMouse
+                  ? root.foreground : root.dim
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.caption
+                font.bold: true
+                font.letterSpacing: 1.2
+                elide: Text.ElideRight
+
+                ToolTip.visible: freshnessMouse.containsMouse
+                  && !refreshIntervalPopup.opened
+                ToolTip.text: "Change refresh interval"
+
+                MouseArea {
+                  id: freshnessMouse
+                  anchors.fill: parent
+                  hoverEnabled: true
+                  cursorShape: Qt.PointingHandCursor
+                  onClicked: refreshIntervalPopup.opened
+                    ? refreshIntervalPopup.close()
+                    : refreshIntervalPopup.open()
+                }
+
+                Popup {
+                  id: refreshIntervalPopup
+                  x: 0
+                  y: freshnessLink.height + Style.spacing.xs
+                  width: Style.space(210)
+                  padding: Style.spacing.md
+                  focus: true
+                  closePolicy: Popup.CloseOnEscape
+                    | Popup.CloseOnPressOutsideParent
+                  onOpened: refreshIntervalField.field.forceActiveFocus()
+                  onClosed: Qt.callLater(function() {
+                    keyCatcher.forceActiveFocus()
+                  })
+
+                  background: BorderSurface {
+                    color: Color.popups.background
+                    borderSpec: Border.controlSpec(
+                      "normal", root.foreground, root.accent)
+                    radius: Style.cornerRadius
+                  }
+
+                  contentItem: Column {
+                    spacing: Style.spacing.sm
+
+                    Text {
+                      text: "REFRESH INTERVAL"
+                      color: root.dim
+                      font.family: root.fontFamily
+                      font.pixelSize: Style.font.caption
+                      font.bold: true
+                    }
+
+                    Row {
+                      spacing: Style.spacing.sm
+
+                      NumberField {
+                        id: refreshIntervalField
+                        fieldWidth: Style.space(72)
+                        from: 2
+                        to: 60
+                        stepSize: 1
+                        value: root.refreshIntervalSec
+                        foreground: root.foreground
+                        accent: root.accent
+                        fontFamily: root.fontFamily
+                        fontSize: Style.font.body
+                        onModified: function(value) {
+                          root.setRefreshInterval(value)
+                        }
+                      }
+
+                      Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "SECONDS"
+                        color: root.dim
+                        font.family: root.fontFamily
+                        font.pixelSize: Style.font.caption
+                        font.bold: true
+                      }
+                    }
+                  }
+                }
               }
             }
 
-            trailingControl: Component {
+            Row {
+              id: heroActions
+              anchors.right: parent.right
+              anchors.verticalCenter: parent.verticalCenter
+              spacing: Style.spacing.xs
+
               PanelActionButton {
+                id: thresholdsAction
+                iconText: "\u{F009A}"
+                tooltipText: "Notification thresholds"
+                foreground: root.foreground
+                fontFamily: root.fontFamily
+                onClicked: {
+                  refreshIntervalPopup.close()
+                  thresholdsPopup.opened
+                    ? thresholdsPopup.close() : thresholdsPopup.open()
+                }
+
+                Popup {
+                  id: thresholdsPopup
+                  x: thresholdsAction.width - width
+                  y: thresholdsAction.height + Style.spacing.xs
+                  width: Style.space(280)
+                  padding: Style.spacing.md
+                  focus: true
+                  closePolicy: Popup.CloseOnEscape
+                    | Popup.CloseOnPressOutsideParent
+                  onClosed: Qt.callLater(function() {
+                    keyCatcher.forceActiveFocus()
+                  })
+
+                  background: BorderSurface {
+                    color: Color.popups.background
+                    borderSpec: Border.controlSpec(
+                      "normal", root.foreground, root.accent)
+                    radius: Style.cornerRadius
+                  }
+
+                  contentItem: Column {
+                    id: thresholdColumn
+                    width: thresholdsPopup.width
+                      - thresholdsPopup.leftPadding
+                      - thresholdsPopup.rightPadding
+                    spacing: Style.spacing.xs
+
+                    Item {
+                      width: parent.width
+                      implicitHeight: Math.max(thresholdTitle.implicitHeight,
+                                               thresholdUnit.implicitHeight)
+
+                      Text {
+                        id: thresholdTitle
+                        anchors.left: parent.left
+                        text: "NOTIFICATION THRESHOLDS"
+                        color: root.dim
+                        font.family: root.fontFamily
+                        font.pixelSize: Style.font.caption
+                        font.bold: true
+                      }
+
+                      Text {
+                        id: thresholdUnit
+                        anchors.right: parent.right
+                        text: "MM:SS"
+                        color: root.dim
+                        font.family: root.fontFamily
+                        font.pixelSize: Style.font.caption
+                        font.bold: true
+                      }
+                    }
+
+                    Repeater {
+                      model: Model.thresholdSettings()
+
+                      delegate: Item {
+                        id: thresholdRow
+                        required property var modelData
+                        width: thresholdColumn.width
+                        implicitHeight: Math.max(thresholdLabel.implicitHeight,
+                                                 thresholdField.implicitHeight)
+
+                        Text {
+                          id: thresholdLabel
+                          anchors.left: parent.left
+                          anchors.right: thresholdField.left
+                          anchors.rightMargin: Style.spacing.md
+                          anchors.verticalCenter: parent.verticalCenter
+                          text: thresholdRow.modelData.label
+                          color: root.foreground
+                          font.family: root.fontFamily
+                          font.pixelSize: Style.font.bodySmall
+                          elide: Text.ElideRight
+                        }
+
+                        TextField {
+                          id: thresholdField
+                          property string savedText: String(root.setting(
+                            thresholdRow.modelData.key,
+                            thresholdRow.modelData.defaultValue))
+                          readonly property string trimmedText:
+                            String(text).trim()
+                          readonly property bool thresholdValid:
+                            trimmedText === "" || trimmedText === "0"
+                              || Model.parseThreshold(trimmedText) > 0
+
+                          anchors.right: parent.right
+                          anchors.verticalCenter: parent.verticalCenter
+                          width: Style.space(78)
+                          text: savedText
+                          placeholderText: "MM:SS"
+                          horizontalAlignment: TextInput.AlignHCenter
+                          foreground: thresholdValid
+                            ? root.foreground : root.urgent
+                          accent: root.accent
+                          font.family: root.fontFamily
+                          font.pixelSize: Style.font.bodySmall
+                          inputMethodHints: Qt.ImhFormattedNumbersOnly
+
+                          onEditingFinished: {
+                            if (!thresholdValid) {
+                              text = savedText
+                              return
+                            }
+                            savedText = trimmedText
+                            root.persistSetting(
+                              thresholdRow.modelData.key, savedText)
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+
+              PanelActionButton {
+                id: refreshAction
                 iconText: root.requestInFlight ? "\u{F0453}" : "\u{F0450}"
                 tooltipText: "Refresh live paces"
                 foreground: root.foreground
@@ -625,61 +898,6 @@ Panel {
               onClicked: root.setFavoritesOnly(!root.shownFavoritesOnly)
               onHovered: function(on) {
                 if (on) root.setCursor(root.rowFavoritesOnly)
-              }
-            }
-          }
-
-          Item {
-            id: refreshIntervalRow
-            width: parent.width
-            implicitHeight: Math.max(refreshIntervalLabel.implicitHeight,
-                                     refreshIntervalControls.implicitHeight)
-
-            Text {
-              id: refreshIntervalLabel
-              anchors.left: parent.left
-              anchors.verticalCenter: parent.verticalCenter
-              text: "REFRESH EVERY"
-              color: root.dim
-              font.family: root.fontFamily
-              font.pixelSize: Style.font.caption
-              font.bold: true
-            }
-
-            Row {
-              id: refreshIntervalControls
-              anchors.right: parent.right
-              anchors.verticalCenter: parent.verticalCenter
-              spacing: Style.spacing.sm
-
-              NumberField {
-                id: refreshIntervalField
-                fieldWidth: Style.space(72)
-                from: 2
-                to: 60
-                stepSize: 1
-                value: root.refreshIntervalSec
-                foreground: root.foreground
-                accent: root.accent
-                fontFamily: root.fontFamily
-                fontSize: Style.font.body
-                hasCursor: root.cursorActive
-                  && root.selectedIndex === root.rowRefreshInterval
-                onModified: function(value) {
-                  root.setRefreshInterval(value)
-                }
-                onHovered: function(on) {
-                  if (on) root.setCursor(root.rowRefreshInterval)
-                }
-              }
-
-              Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: "SECONDS"
-                color: root.dim
-                font.family: root.fontFamily
-                font.pixelSize: Style.font.caption
-                font.bold: true
               }
             }
           }
@@ -914,6 +1132,32 @@ Panel {
         width: parent.width
         visible: row.expanded
         spacing: Style.spacing.xs
+
+        Item {
+          width: parent.width
+          implicitHeight: Math.max(detailsHeader.implicitHeight,
+                                   collapseButton.implicitHeight)
+
+          PanelSectionHeader {
+            id: detailsHeader
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            text: "RUN DETAILS"
+            foreground: root.foreground
+            fontFamily: root.fontFamily
+          }
+
+          PanelActionButton {
+            id: collapseButton
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            iconText: "\u{F0156}"
+            tooltipText: "Collapse run details"
+            foreground: root.foreground
+            fontFamily: root.fontFamily
+            onClicked: root.expandedWorldId = ""
+          }
+        }
 
         PanelSeparator {
           width: parent.width

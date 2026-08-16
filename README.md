@@ -30,10 +30,12 @@ The widget reads PaceMan's public liveruns endpoint directly from QML.
 - Left-click the bar counter to open or close the pace board.
 - Middle-click to refresh immediately.
 - Right-click to open PaceMan.gg.
-- Set the automatic refresh interval from the panel or widget settings
-  (`2–60` seconds).
+- Click the freshness text to set the automatic refresh interval
+  (`2–60` seconds), or use the widget settings.
+- Use the bell tool to edit notification thresholds for every standard split.
 - Click a run to expand its splits; double-click or use the external-link action
   to open its Twitch stream or PaceMan profile.
+- Collapse expanded run details with the close action in its header.
 - Star a runner to persist them as a favorite.
 - Keyboard navigation supports `j`/`k`, `Enter`, `f` to favorite, `o` to open,
   `r` to refresh, and `Esc` to close.
@@ -49,6 +51,9 @@ Three independent notification sources are available in widget settings:
 When more than one condition applies to the same split, the widget sends one
 combined notification. The first API snapshot and reconnect snapshots never
 replay alerts for runs that were already active.
+
+Notifications include an action that opens the live Twitch stream when
+available, or the runner's PaceMan profile otherwise.
 
 Default thresholds:
 

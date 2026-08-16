@@ -136,6 +136,15 @@ Item {
       compare(Model.normalizeRefreshInterval(17.6), 18)
       compare(Model.normalizeRefreshInterval(90), 60)
     }
+
+    function test_threshold_settings_follow_split_order() {
+      var settings = Model.thresholdSettings()
+      compare(settings.length, 8)
+      compare(settings[0].key, "thresholdNether")
+      compare(settings[0].label, "Enter Nether")
+      compare(settings[7].key, "thresholdFinish")
+      compare(settings[7].defaultValue, "10:00")
+    }
   }
 
   TestCase {
@@ -229,6 +238,26 @@ Item {
       compare(next.alerts.length, 1)
       verify(next.alerts[0].body.indexOf("under threshold") >= 0)
       verify(next.alerts[0].body.indexOf("high-quality pace") >= 0)
+    }
+
+    function test_notifications_link_to_stream_or_profile() {
+      var streamRun = parsedRun("stream", "Streamer",
+        [event("rsg.enter_nether", 90000)])
+      streamRun.twitch = "streamer_live"
+      var streamAlert = Model.buildAlert(
+        streamRun, streamRun.eventList[0], ["threshold"])
+      var streamArgs = Model.notificationArgs(streamAlert)
+      verify(streamArgs.indexOf("https://twitch.tv/streamer_live") >= 0)
+      verify(streamArgs.indexOf("Watch live") >= 0)
+
+      var profileRun = parsedRun("profile", "Runner Name",
+        [event("rsg.enter_nether", 90000)])
+      var profileAlert = Model.buildAlert(
+        profileRun, profileRun.eventList[0], ["threshold"])
+      var profileArgs = Model.notificationArgs(profileAlert)
+      verify(profileArgs.indexOf(
+        Model.SITE_URL + "stats/player/Runner%20Name") >= 0)
+      verify(profileArgs.indexOf("Open PaceMan profile") >= 0)
     }
 
     function test_brief_api_omission_does_not_replay_alerts() {
