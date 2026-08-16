@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "nille.paceman",
   "name": "PaceMan",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": "nille",
   "license": "MIT",
   "description": "Follow live Minecraft speedrunning paces from PaceMan.gg, with favorite-runner and split-threshold notifications.",
@@ -32,18 +32,18 @@
       "liveOnly": false,
       "favoritesOnly": false,
       "favoriteRunners": "",
-      "notifyStreamingOnly": false,
-      "notifyFavorites": true,
+      "notifyStreamingOnly": true,
+      "notifyFavorites": false,
       "notifyHighQuality": true,
-      "notifyThresholds": true,
-      "notifyThresholdNether": true,
-      "notifyThresholdBastion": true,
-      "notifyThresholdFortress": true,
-      "notifyThresholdFirstPortal": true,
-      "notifyThresholdSecondPortal": true,
-      "notifyThresholdStronghold": true,
-      "notifyThresholdEnd": true,
-      "notifyThresholdFinish": true,
+      "notifyThresholds": false,
+      "notifyThresholdNether": false,
+      "notifyThresholdBastion": false,
+      "notifyThresholdFortress": false,
+      "notifyThresholdFirstPortal": false,
+      "notifyThresholdSecondPortal": false,
+      "notifyThresholdStronghold": false,
+      "notifyThresholdEnd": false,
+      "notifyThresholdFinish": false,
       "thresholdNether": "02:00",
       "thresholdBastion": "04:30",
       "thresholdFortress": "04:30",
@@ -125,14 +125,14 @@
         "key": "notifyStreamingOnly",
         "type": "boolean",
         "label": "Streaming runners only",
-        "defaultValue": false,
+        "defaultValue": true,
         "description": "Suppress all notifications for runners PaceMan does not report as currently streaming on Twitch."
       },
       {
         "key": "notifyFavorites",
         "type": "boolean",
         "label": "Favorite runner alerts",
-        "defaultValue": true,
+        "defaultValue": false,
         "description": "Notify when a favorite runner starts a newly reported run."
       },
       {
@@ -146,56 +146,56 @@
         "key": "notifyThresholds",
         "type": "boolean",
         "label": "Split threshold alerts",
-        "defaultValue": true,
+        "defaultValue": false,
         "description": "Notify when a newly reported split is at or below its configured time."
       },
       {
         "key": "notifyThresholdNether",
         "type": "boolean",
         "label": "Enter Nether alerts",
-        "defaultValue": true
+        "defaultValue": false
       },
       {
         "key": "notifyThresholdBastion",
         "type": "boolean",
         "label": "Enter Bastion alerts",
-        "defaultValue": true
+        "defaultValue": false
       },
       {
         "key": "notifyThresholdFortress",
         "type": "boolean",
         "label": "Enter Fortress alerts",
-        "defaultValue": true
+        "defaultValue": false
       },
       {
         "key": "notifyThresholdFirstPortal",
         "type": "boolean",
         "label": "First Portal alerts",
-        "defaultValue": true
+        "defaultValue": false
       },
       {
         "key": "notifyThresholdSecondPortal",
         "type": "boolean",
         "label": "Second Portal alerts",
-        "defaultValue": true
+        "defaultValue": false
       },
       {
         "key": "notifyThresholdStronghold",
         "type": "boolean",
         "label": "Enter Stronghold alerts",
-        "defaultValue": true
+        "defaultValue": false
       },
       {
         "key": "notifyThresholdEnd",
         "type": "boolean",
         "label": "Enter End alerts",
-        "defaultValue": true
+        "defaultValue": false
       },
       {
         "key": "notifyThresholdFinish",
         "type": "boolean",
         "label": "Finish alerts",
-        "defaultValue": true
+        "defaultValue": false
       },
       {
         "key": "thresholdNether",

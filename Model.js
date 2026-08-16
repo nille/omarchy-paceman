@@ -336,14 +336,14 @@ function alertConfig(settings) {
     var enabledKey = THRESHOLD_ENABLED_KEYS[eventId]
     var value = source[key]
     if (value === undefined || value === null) value = DEFAULT_THRESHOLDS[key]
-    thresholds[eventId] = source[enabledKey] === false
-      ? 0 : parseThreshold(value)
+    thresholds[eventId] = source[enabledKey] === true
+      ? parseThreshold(value) : 0
   }
   return {
-    notifyStreamingOnly: source.notifyStreamingOnly === true,
-    notifyFavorites: source.notifyFavorites !== false,
+    notifyStreamingOnly: source.notifyStreamingOnly !== false,
+    notifyFavorites: source.notifyFavorites === true,
     notifyHighQuality: source.notifyHighQuality !== false,
-    notifyThresholds: source.notifyThresholds !== false,
+    notifyThresholds: source.notifyThresholds === true,
     thresholds: thresholds
   }
 }

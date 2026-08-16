@@ -50,6 +50,10 @@ Three independent notification sources are available in widget settings:
 - A split is reported at or below its configured `MM:SS` threshold.
 - A run reaches PaceMan's current high-quality criteria.
 
+By default, notifications are limited to runners currently streaming on
+Twitch, and only high-quality pace alerts are enabled. Favorite and split
+alerts default off.
+
 The bell tool exposes the high-quality toggle, the split-alert master toggle,
 and an individual enable switch for every standard split. Turning a split off
 preserves its configured threshold.

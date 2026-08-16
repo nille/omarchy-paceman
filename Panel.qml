@@ -742,7 +742,7 @@ Panel {
                     Item {
                       id: favoriteAlertsRow
                       property bool enabledValue:
-                        root.setting("notifyFavorites", true) !== false
+                        root.setting("notifyFavorites", false) === true
                       width: parent.width
                       implicitHeight: Math.max(favoriteAlertsLabel.implicitHeight,
                                                favoriteAlertsSwitch.implicitHeight)
@@ -916,9 +916,9 @@ Panel {
                   contentItem: Column {
                     id: thresholdColumn
                     property bool streamingOnlyEnabled:
-                      root.setting("notifyStreamingOnly", false) === true
+                      root.setting("notifyStreamingOnly", true) !== false
                     property bool thresholdAlertsEnabled:
-                      root.setting("notifyThresholds", true) !== false
+                      root.setting("notifyThresholds", false) === true
                     width: thresholdsPopup.width
                       - thresholdsPopup.leftPadding
                       - thresholdsPopup.rightPadding
@@ -1076,7 +1076,7 @@ Panel {
                         id: thresholdRow
                         required property var modelData
                         property bool enabledValue: root.setting(
-                          modelData.enabledKey, true) !== false
+                          modelData.enabledKey, false) === true
                         width: thresholdColumn.width
                         implicitHeight: Math.max(thresholdLabel.implicitHeight,
                                                  thresholdSwitch.implicitHeight)

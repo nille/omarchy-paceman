@@ -157,6 +157,18 @@ Item {
       compare(config.thresholds["rsg.enter_nether"], 0)
       compare(config.thresholds["rsg.enter_bastion"], 210000)
     }
+
+    function test_notification_defaults_only_enable_streaming_quality_runs() {
+      var config = Model.alertConfig({})
+      verify(config.notifyStreamingOnly)
+      verify(!config.notifyFavorites)
+      verify(config.notifyHighQuality)
+      verify(!config.notifyThresholds)
+      compare(config.thresholds["rsg.enter_nether"], 0)
+      compare(config.thresholds["rsg.credits"], 0)
+      compare(Model.thresholdSettings()[0].defaultValue, "02:00")
+      compare(Model.thresholdSettings()[7].defaultValue, "10:00")
+    }
   }
 
   TestCase {
@@ -205,20 +217,28 @@ Item {
       var run = parsedRun("world", "Favorite",
         [event("rsg.enter_nether", 130000)], "Favorite")
       var next = Model.transitionAlerts(
-        initial.state, [run], Model.alertConfig({ notifyThresholds: false }), 2000)
+        initial.state, [run], Model.alertConfig({
+          notifyStreamingOnly: false,
+          notifyFavorites: true
+        }), 2000)
       compare(next.alerts.length, 1)
       verify(next.alerts[0].body.indexOf("favorite runner") >= 0)
 
       var same = Model.transitionAlerts(
-        next.state, [run], Model.alertConfig({ notifyThresholds: false }), 3000)
+        next.state, [run], Model.alertConfig({
+          notifyStreamingOnly: false,
+          notifyFavorites: true
+        }), 3000)
       compare(same.alerts.length, 0)
     }
 
     function test_new_split_below_threshold_notifies() {
       var config = Model.alertConfig({
+        notifyStreamingOnly: false,
         notifyFavorites: false,
         notifyHighQuality: false,
         notifyThresholds: true,
+        notifyThresholdBastion: true,
         thresholdNether: "01:30",
         thresholdBastion: "03:30"
       })
@@ -243,6 +263,7 @@ Item {
         notifyFavorites: true,
         notifyHighQuality: true,
         notifyThresholds: true,
+        notifyThresholdFortress: true,
         thresholdFortress: "04:30"
       })
       var favorite = "Runner"
@@ -273,9 +294,11 @@ Item {
 
     function test_threshold_and_quality_reasons_are_combined() {
       var config = Model.alertConfig({
+        notifyStreamingOnly: false,
         notifyFavorites: false,
         notifyHighQuality: true,
         notifyThresholds: true,
+        notifyThresholdFortress: true,
         thresholdFortress: "04:30"
       })
       var first = parsedRun("world", "Runner", [
@@ -297,6 +320,7 @@ Item {
 
     function test_high_quality_alert_does_not_require_split_thresholds() {
       var config = Model.alertConfig({
+        notifyStreamingOnly: false,
         notifyFavorites: false,
         notifyHighQuality: true,
         notifyThresholds: false
@@ -344,6 +368,7 @@ Item {
 
     function test_brief_api_omission_does_not_replay_alerts() {
       var config = Model.alertConfig({
+        notifyStreamingOnly: false,
         notifyFavorites: true,
         notifyHighQuality: false,
         notifyThresholds: false
