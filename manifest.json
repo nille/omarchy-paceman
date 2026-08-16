@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "id": "nille.paceman",
+  "name": "PaceMan",
+  "version": "0.1.0",
+  "author": "nille",
+  "license": "MIT",
+  "description": "Follow live Minecraft speedrunning paces from PaceMan.gg, with favorite-runner and split-threshold notifications.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "PaceMan",
+    "description": "Active Minecraft speedrunning paces, live from PaceMan.gg.",
+    "category": "Info",
+    "aliases": [
+      "paceman",
+      "minecraft",
+      "speedrun",
+      "mcsr",
+      "pace",
+      "rsg"
+    ],
+    "defaultSection": "right",
+    "allowMultiple": false,
+    "defaults": {
+      "refreshIntervalSec": 15,
+      "gameVersion": "1.16.1",
+      "liveOnly": false,
+      "favoritesOnly": false,
+      "favoriteRunners": "",
+      "notifyFavorites": true,
+      "notifyHighQuality": true,
+      "notifyThresholds": true,
+      "thresholdNether": "02:00",
+      "thresholdBastion": "04:30",
+      "thresholdFortress": "04:30",
+      "thresholdFirstPortal": "06:00",
+      "thresholdSecondPortal": "07:00",
+      "thresholdStronghold": "07:30",
+      "thresholdEnd": "08:00",
+      "thresholdFinish": "10:00"
+    },
+    "schema": [
+      {
+        "key": "refreshIntervalSec",
+        "type": "integer",
+        "label": "Refresh interval (seconds)",
+        "min": 2,
+        "max": 60,
+        "step": 1,
+        "defaultValue": 15,
+        "description": "How often to refresh PaceMan's live runs."
+      },
+      {
+        "key": "gameVersion",
+        "type": "enum",
+        "label": "Game version",
+        "options": [
+          "1.16.1",
+          "All",
+          "1.15.2",
+          "1.8.9",
+          "1.14.4",
+          "1.12.2",
+          "1.16.5",
+          "1.17.1",
+          "1.8",
+          "1.12",
+          "1.3.1",
+          "1.4.2",
+          "1.4.7",
+          "1.5.2",
+          "1.6.4",
+          "1.7.2",
+          "1.7.4",
+          "1.9.4",
+          "1.10.2",
+          "1.11.2",
+          "1.18.1",
+          "1.18.2",
+          "1.19.2",
+          "1.19.4",
+          "1.20.4",
+          "1.20.6",
+          "1.21",
+          "1.13.2"
+        ],
+        "defaultValue": "1.16.1"
+      },
+      {
+        "key": "liveOnly",
+        "type": "boolean",
+        "label": "Twitch live only",
+        "defaultValue": false,
+        "description": "Only show runners whose linked Twitch account is live."
+      },
+      {
+        "key": "favoritesOnly",
+        "type": "boolean",
+        "label": "Favorites only",
+        "defaultValue": false,
+        "description": "Only show runners in the favorites list."
+      },
+      {
+        "key": "favoriteRunners",
+        "type": "string",
+        "label": "Favorite runners",
+        "defaultValue": "",
+        "description": "Comma-separated Minecraft usernames. Runners can also be starred from the panel."
+      },
+      {
+        "key": "notifyFavorites",
+        "type": "boolean",
+        "label": "Favorite runner alerts",
+        "defaultValue": true,
+        "description": "Notify when a favorite runner starts a newly reported run."
+      },
+      {
+        "key": "notifyHighQuality",
+        "type": "boolean",
+        "label": "High-quality pace alerts",
+        "defaultValue": true,
+        "description": "Notify when PaceMan's current good-pace criteria are reached."
+      },
+      {
+        "key": "notifyThresholds",
+        "type": "boolean",
+        "label": "Split threshold alerts",
+        "defaultValue": true,
+        "description": "Notify when a newly reported split is at or below its configured time."
+      },
+      {
+        "key": "thresholdNether",
+        "type": "string",
+        "label": "Enter Nether threshold",
+        "defaultValue": "02:00",
+        "description": "MM:SS. Blank or 0 disables this split."
+      },
+      {
+        "key": "thresholdBastion",
+        "type": "string",
+        "label": "Enter Bastion threshold",
+        "defaultValue": "04:30",
+        "description": "MM:SS. Blank or 0 disables this split."
+      },
+      {
+        "key": "thresholdFortress",
+        "type": "string",
+        "label": "Enter Fortress threshold",
+        "defaultValue": "04:30",
+        "description": "MM:SS. Blank or 0 disables this split."
+      },
+      {
+        "key": "thresholdFirstPortal",
+        "type": "string",
+        "label": "First Portal threshold",
+        "defaultValue": "06:00",
+        "description": "MM:SS. Blank or 0 disables this split."
+      },
+      {
+        "key": "thresholdSecondPortal",
+        "type": "string",
+        "label": "Second Portal threshold",
+        "defaultValue": "07:00",
+        "description": "MM:SS. Blank or 0 disables this split."
+      },
+      {
+        "key": "thresholdStronghold",
+        "type": "string",
+        "label": "Enter Stronghold threshold",
+        "defaultValue": "07:30",
+        "description": "MM:SS. Blank or 0 disables this split."
+      },
+      {
+        "key": "thresholdEnd",
+        "type": "string",
+        "label": "Enter End threshold",
+        "defaultValue": "08:00",
+        "description": "MM:SS. Blank or 0 disables this split."
+      },
+      {
+        "key": "thresholdFinish",
+        "type": "string",
+        "label": "Finish threshold",
+        "defaultValue": "10:00",
+        "description": "MM:SS. Blank or 0 disables this split."
+      }
+    ]
+  }
+}
