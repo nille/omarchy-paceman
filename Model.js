@@ -340,6 +340,7 @@ function alertConfig(settings) {
       ? 0 : parseThreshold(value)
   }
   return {
+    notifyStreamingOnly: source.notifyStreamingOnly === true,
     notifyFavorites: source.notifyFavorites !== false,
     notifyHighQuality: source.notifyHighQuality !== false,
     notifyThresholds: source.notifyThresholds !== false,
@@ -380,6 +381,7 @@ function transitionAlerts(previous, runs, config, nowMs) {
     }
 
     if (!previousState.hydrated) continue
+    if (options.notifyStreamingOnly && !run.twitch) continue
 
     var favoriteStart = !old && run.isFavorite && options.notifyFavorites
     var candidates = old ? newEvents : (run.eventList.length

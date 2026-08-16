@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "nille.paceman",
   "name": "PaceMan",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": "nille",
   "license": "MIT",
   "description": "Follow live Minecraft speedrunning paces from PaceMan.gg, with favorite-runner and split-threshold notifications.",
@@ -32,6 +32,7 @@
       "liveOnly": false,
       "favoritesOnly": false,
       "favoriteRunners": "",
+      "notifyStreamingOnly": false,
       "notifyFavorites": true,
       "notifyHighQuality": true,
       "notifyThresholds": true,
@@ -119,6 +120,13 @@
         "label": "Favorite runners",
         "defaultValue": "",
         "description": "Comma-separated Minecraft usernames. Runners can also be starred from the panel."
+      },
+      {
+        "key": "notifyStreamingOnly",
+        "type": "boolean",
+        "label": "Streaming runners only",
+        "defaultValue": false,
+        "description": "Suppress all notifications for runners PaceMan does not report as currently streaming on Twitch."
       },
       {
         "key": "notifyFavorites",

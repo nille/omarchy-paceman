@@ -237,6 +237,40 @@ Item {
       verify(next.alerts[0].body.indexOf("03:20") >= 0)
     }
 
+    function test_streaming_only_suppresses_all_non_streaming_alerts() {
+      var config = Model.alertConfig({
+        notifyStreamingOnly: true,
+        notifyFavorites: true,
+        notifyHighQuality: true,
+        notifyThresholds: true,
+        thresholdFortress: "04:30"
+      })
+      var favorite = "Runner"
+      var first = parsedRun("world", favorite, [
+        event("rsg.enter_nether", 100000),
+        event("rsg.enter_bastion", 180000)
+      ], favorite)
+      var initial = Model.transitionAlerts(
+        Model.emptyAlertState(), [], config, 1000)
+      var progressed = Model.transitionAlerts(
+        initial.state, [first], config, 2000)
+
+      compare(progressed.alerts.length, 0)
+      verify(progressed.state.worlds.world.events["rsg.enter_bastion"])
+
+      first.twitch = "runner_live"
+      var streamed = parsedRun("stream", "Streamer", [
+        event("rsg.enter_nether", 100000),
+        event("rsg.enter_bastion", 180000),
+        event("rsg.enter_fortress", 260000)
+      ])
+      streamed.twitch = "streamer_live"
+      var streamingInitial = Model.transitionAlerts(
+        progressed.state, [first, streamed], config, 3000)
+      compare(streamingInitial.alerts.length, 1)
+      compare(streamingInitial.alerts[0].worldId, "stream")
+    }
+
     function test_threshold_and_quality_reasons_are_combined() {
       var config = Model.alertConfig({
         notifyFavorites: false,

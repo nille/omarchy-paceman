@@ -54,6 +54,9 @@ The bell tool exposes the high-quality toggle, the split-alert master toggle,
 and an individual enable switch for every standard split. Turning a split off
 preserves its configured threshold.
 
+Enable **Streaming runners only** in the bell menu to suppress every alert
+from runners PaceMan does not currently report as streaming on Twitch.
+
 When more than one condition applies to the same split, the widget sends one
 combined notification. The first API snapshot and reconnect snapshots never
 replay alerts for runs that were already active.

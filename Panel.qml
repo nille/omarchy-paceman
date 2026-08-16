@@ -915,6 +915,8 @@ Panel {
 
                   contentItem: Column {
                     id: thresholdColumn
+                    property bool streamingOnlyEnabled:
+                      root.setting("notifyStreamingOnly", false) === true
                     property bool thresholdAlertsEnabled:
                       root.setting("notifyThresholds", true) !== false
                     width: thresholdsPopup.width
@@ -946,6 +948,47 @@ Panel {
                         font.pixelSize: Style.font.caption
                         font.bold: true
                       }
+                    }
+
+                    Item {
+                      id: streamingOnlyRow
+                      width: parent.width
+                      implicitHeight: Math.max(
+                        streamingOnlyLabel.implicitHeight,
+                        streamingOnlySwitch.implicitHeight)
+
+                      Text {
+                        id: streamingOnlyLabel
+                        anchors.left: parent.left
+                        anchors.right: streamingOnlySwitch.left
+                        anchors.rightMargin: Style.spacing.md
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Streaming runners only"
+                        color: root.foreground
+                        font.family: root.fontFamily
+                        font.pixelSize: Style.font.bodySmall
+                      }
+
+                      ToggleSwitch {
+                        id: streamingOnlySwitch
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        checked: thresholdColumn.streamingOnlyEnabled
+                        foreground: root.foreground
+                        accent: root.accent
+                        onToggled: {
+                          thresholdColumn.streamingOnlyEnabled =
+                            !thresholdColumn.streamingOnlyEnabled
+                          root.persistSetting(
+                            "notifyStreamingOnly",
+                            thresholdColumn.streamingOnlyEnabled)
+                        }
+                      }
+                    }
+
+                    PanelSeparator {
+                      width: parent.width
+                      foreground: root.foreground
                     }
 
                     Item {

@@ -66,6 +66,7 @@ ShellRoot {
             liveOnly: false,
             favoritesOnly: false,
             favoriteRunners: "",
+            notifyStreamingOnly: false,
             notifyFavorites: false,
             notifyHighQuality: false,
             notifyThresholds: false
