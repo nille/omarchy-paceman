@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "nille.paceman",
   "name": "PaceMan",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "nille",
   "license": "MIT",
   "description": "Follow live Minecraft speedrunning paces from PaceMan.gg, with favorite-runner and split-threshold notifications.",
@@ -35,6 +35,14 @@
       "notifyFavorites": true,
       "notifyHighQuality": true,
       "notifyThresholds": true,
+      "notifyThresholdNether": true,
+      "notifyThresholdBastion": true,
+      "notifyThresholdFortress": true,
+      "notifyThresholdFirstPortal": true,
+      "notifyThresholdSecondPortal": true,
+      "notifyThresholdStronghold": true,
+      "notifyThresholdEnd": true,
+      "notifyThresholdFinish": true,
       "thresholdNether": "02:00",
       "thresholdBastion": "04:30",
       "thresholdFortress": "04:30",
@@ -132,6 +140,54 @@
         "label": "Split threshold alerts",
         "defaultValue": true,
         "description": "Notify when a newly reported split is at or below its configured time."
+      },
+      {
+        "key": "notifyThresholdNether",
+        "type": "boolean",
+        "label": "Enter Nether alerts",
+        "defaultValue": true
+      },
+      {
+        "key": "notifyThresholdBastion",
+        "type": "boolean",
+        "label": "Enter Bastion alerts",
+        "defaultValue": true
+      },
+      {
+        "key": "notifyThresholdFortress",
+        "type": "boolean",
+        "label": "Enter Fortress alerts",
+        "defaultValue": true
+      },
+      {
+        "key": "notifyThresholdFirstPortal",
+        "type": "boolean",
+        "label": "First Portal alerts",
+        "defaultValue": true
+      },
+      {
+        "key": "notifyThresholdSecondPortal",
+        "type": "boolean",
+        "label": "Second Portal alerts",
+        "defaultValue": true
+      },
+      {
+        "key": "notifyThresholdStronghold",
+        "type": "boolean",
+        "label": "Enter Stronghold alerts",
+        "defaultValue": true
+      },
+      {
+        "key": "notifyThresholdEnd",
+        "type": "boolean",
+        "label": "Enter End alerts",
+        "defaultValue": true
+      },
+      {
+        "key": "notifyThresholdFinish",
+        "type": "boolean",
+        "label": "Finish alerts",
+        "defaultValue": true
       },
       {
         "key": "thresholdNether",

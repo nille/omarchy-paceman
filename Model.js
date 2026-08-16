@@ -67,6 +67,17 @@ var THRESHOLD_KEYS = ({
   "rsg.credits": "thresholdFinish"
 })
 
+var THRESHOLD_ENABLED_KEYS = ({
+  "rsg.enter_nether": "notifyThresholdNether",
+  "rsg.enter_bastion": "notifyThresholdBastion",
+  "rsg.enter_fortress": "notifyThresholdFortress",
+  "rsg.first_portal": "notifyThresholdFirstPortal",
+  "rsg.second_portal": "notifyThresholdSecondPortal",
+  "rsg.enter_stronghold": "notifyThresholdStronghold",
+  "rsg.enter_end": "notifyThresholdEnd",
+  "rsg.credits": "notifyThresholdFinish"
+})
+
 var DEFAULT_THRESHOLDS = ({
   thresholdNether: "02:00",
   thresholdBastion: "04:30",
@@ -98,6 +109,7 @@ function thresholdSettings() {
     var key = THRESHOLD_KEYS[eventId]
     out.push({
       key: key,
+      enabledKey: THRESHOLD_ENABLED_KEYS[eventId],
       label: EVENT_NAMES[eventId],
       defaultValue: DEFAULT_THRESHOLDS[key]
     })
@@ -288,9 +300,11 @@ function alertConfig(settings) {
   var thresholds = ({})
   for (var eventId in THRESHOLD_KEYS) {
     var key = THRESHOLD_KEYS[eventId]
+    var enabledKey = THRESHOLD_ENABLED_KEYS[eventId]
     var value = source[key]
     if (value === undefined || value === null) value = DEFAULT_THRESHOLDS[key]
-    thresholds[eventId] = parseThreshold(value)
+    thresholds[eventId] = source[enabledKey] === false
+      ? 0 : parseThreshold(value)
   }
   return {
     notifyFavorites: source.notifyFavorites !== false,
@@ -393,11 +407,24 @@ function buildAlert(run, event, reasons) {
   }
 }
 
-function notificationArgs(alert) {
+function notificationArgs(alert, iconPath) {
   if (!alert) return null
+  var notificationKey = (String(alert.worldId || "pace")
+    + "_" + String(alert.eventId || "event"))
+    .replace(/[^A-Za-z0-9_.-]/g, "_")
   return [
     "sh", "-c",
-    "choice=$(notify-send --app-name=PaceMan --icon=applications-games"
+    "runtime=\"${XDG_RUNTIME_DIR:-/tmp}/omarchy-paceman\";"
+      + " mkdir -p \"$runtime\";"
+      + " exec 9>\"$runtime/notifications.lock\";"
+      + " flock -x 9;"
+      + " stamp=\"$runtime/$6\";"
+      + " now=$(date +%s);"
+      + " last=$(cat \"$stamp\" 2>/dev/null || echo 0);"
+      + " if [ $((now-last)) -lt 120 ]; then exit 0; fi;"
+      + " printf '%s\\n' \"$now\" > \"$stamp\";"
+      + " flock -u 9;"
+      + " choice=$(notify-send --app-name=PaceMan \"--icon=$5\""
       + " --expire-time=10000 \"--action=open=$4\" \"$1\" \"$2\");"
       + " if [ \"$choice\" = open ]; then"
       + " exec omarchy-launch-browser \"$3\"; fi",
@@ -405,7 +432,9 @@ function notificationArgs(alert) {
     String(alert.title || "PaceMan"),
     String(alert.body || ""),
     String(alert.url || SITE_URL),
-    String(alert.actionLabel || "Open PaceMan")
+    String(alert.actionLabel || "Open PaceMan"),
+    String(iconPath || "applications-games"),
+    notificationKey
   ]
 }
 

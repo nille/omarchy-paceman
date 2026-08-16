@@ -141,9 +141,21 @@ Item {
       var settings = Model.thresholdSettings()
       compare(settings.length, 8)
       compare(settings[0].key, "thresholdNether")
+      compare(settings[0].enabledKey, "notifyThresholdNether")
       compare(settings[0].label, "Enter Nether")
       compare(settings[7].key, "thresholdFinish")
       compare(settings[7].defaultValue, "10:00")
+    }
+
+    function test_split_alerts_can_be_disabled_without_losing_thresholds() {
+      var config = Model.alertConfig({
+        thresholdNether: "01:45",
+        notifyThresholdNether: false,
+        thresholdBastion: "03:30",
+        notifyThresholdBastion: true
+      })
+      compare(config.thresholds["rsg.enter_nether"], 0)
+      compare(config.thresholds["rsg.enter_bastion"], 210000)
     }
   }
 
@@ -240,15 +252,42 @@ Item {
       verify(next.alerts[0].body.indexOf("high-quality pace") >= 0)
     }
 
+    function test_high_quality_alert_does_not_require_split_thresholds() {
+      var config = Model.alertConfig({
+        notifyFavorites: false,
+        notifyHighQuality: true,
+        notifyThresholds: false
+      })
+      var first = parsedRun("quality", "Runner", [
+        event("rsg.enter_nether", 100000),
+        event("rsg.enter_bastion", 180000)
+      ])
+      var initial = Model.transitionAlerts(
+        Model.emptyAlertState(), [first], config, 1000)
+      var progressed = parsedRun("quality", "Runner", [
+        event("rsg.enter_nether", 100000),
+        event("rsg.enter_bastion", 180000),
+        event("rsg.enter_fortress", 260000)
+      ])
+      var next = Model.transitionAlerts(initial.state, [progressed], config, 2000)
+      compare(next.alerts.length, 1)
+      verify(next.alerts[0].body.indexOf("high-quality pace") >= 0)
+      verify(next.alerts[0].body.indexOf("under threshold") < 0)
+    }
+
     function test_notifications_link_to_stream_or_profile() {
       var streamRun = parsedRun("stream", "Streamer",
         [event("rsg.enter_nether", 90000)])
       streamRun.twitch = "streamer_live"
       var streamAlert = Model.buildAlert(
         streamRun, streamRun.eventList[0], ["threshold"])
-      var streamArgs = Model.notificationArgs(streamAlert)
+      var streamArgs = Model.notificationArgs(
+        streamAlert, "/tmp/minecraft.png")
       verify(streamArgs.indexOf("https://twitch.tv/streamer_live") >= 0)
       verify(streamArgs.indexOf("Watch live") >= 0)
+      verify(streamArgs.indexOf("/tmp/minecraft.png") >= 0)
+      verify(streamArgs[2].indexOf("flock -x") >= 0)
+      verify(streamArgs.indexOf("stream_rsg.enter_nether") >= 0)
 
       var profileRun = parsedRun("profile", "Runner Name",
         [event("rsg.enter_nether", 90000)])

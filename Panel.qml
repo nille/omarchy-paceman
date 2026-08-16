@@ -241,7 +241,10 @@ Panel {
       alertState, allRuns, Model.alertConfig(settings), lastSuccessAt)
     alertState = transition.state
     for (var i = 0; i < transition.alerts.length; i++) {
-      var argv = Model.notificationArgs(transition.alerts[i])
+      var argv = Model.notificationArgs(
+        transition.alerts[i],
+        Quickshell.env("HOME")
+          + "/.config/omarchy/plugins/nille.paceman/assets/minecraft.png")
       if (argv) Quickshell.execDetached(argv)
     }
 
@@ -697,6 +700,8 @@ Panel {
 
                   contentItem: Column {
                     id: thresholdColumn
+                    property bool thresholdAlertsEnabled:
+                      root.setting("notifyThresholds", true) !== false
                     width: thresholdsPopup.width
                       - thresholdsPopup.leftPadding
                       - thresholdsPopup.rightPadding
@@ -728,15 +733,95 @@ Panel {
                       }
                     }
 
+                    Item {
+                      id: qualityAlertRow
+                      property bool enabledValue:
+                        root.setting("notifyHighQuality", true) !== false
+                      width: parent.width
+                      implicitHeight: Math.max(qualityAlertLabel.implicitHeight,
+                                               qualityAlertSwitch.implicitHeight)
+
+                      Text {
+                        id: qualityAlertLabel
+                        anchors.left: parent.left
+                        anchors.right: qualityAlertSwitch.left
+                        anchors.rightMargin: Style.spacing.md
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "High-quality runs"
+                        color: root.foreground
+                        font.family: root.fontFamily
+                        font.pixelSize: Style.font.bodySmall
+                      }
+
+                      ToggleSwitch {
+                        id: qualityAlertSwitch
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        checked: qualityAlertRow.enabledValue
+                        foreground: root.foreground
+                        accent: root.accent
+                        onToggled: {
+                          qualityAlertRow.enabledValue =
+                            !qualityAlertRow.enabledValue
+                          root.persistSetting(
+                            "notifyHighQuality",
+                            qualityAlertRow.enabledValue)
+                        }
+                      }
+                    }
+
+                    Item {
+                      id: thresholdAlertsRow
+                      width: parent.width
+                      implicitHeight: Math.max(
+                        thresholdAlertsLabel.implicitHeight,
+                        thresholdAlertsSwitch.implicitHeight)
+
+                      Text {
+                        id: thresholdAlertsLabel
+                        anchors.left: parent.left
+                        anchors.right: thresholdAlertsSwitch.left
+                        anchors.rightMargin: Style.spacing.md
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Split threshold alerts"
+                        color: root.foreground
+                        font.family: root.fontFamily
+                        font.pixelSize: Style.font.bodySmall
+                      }
+
+                      ToggleSwitch {
+                        id: thresholdAlertsSwitch
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        checked: thresholdColumn.thresholdAlertsEnabled
+                        foreground: root.foreground
+                        accent: root.accent
+                        onToggled: {
+                          thresholdColumn.thresholdAlertsEnabled =
+                            !thresholdColumn.thresholdAlertsEnabled
+                          root.persistSetting(
+                            "notifyThresholds",
+                            thresholdColumn.thresholdAlertsEnabled)
+                        }
+                      }
+                    }
+
+                    PanelSeparator {
+                      width: parent.width
+                      foreground: root.foreground
+                    }
+
                     Repeater {
                       model: Model.thresholdSettings()
 
                       delegate: Item {
                         id: thresholdRow
                         required property var modelData
+                        property bool enabledValue: root.setting(
+                          modelData.enabledKey, true) !== false
                         width: thresholdColumn.width
                         implicitHeight: Math.max(thresholdLabel.implicitHeight,
-                                                 thresholdField.implicitHeight)
+                                                 thresholdSwitch.implicitHeight)
 
                         Text {
                           id: thresholdLabel
@@ -749,6 +834,8 @@ Panel {
                           font.family: root.fontFamily
                           font.pixelSize: Style.font.bodySmall
                           elide: Text.ElideRight
+                          opacity: thresholdColumn.thresholdAlertsEnabled
+                            ? 1 : 0.45
                         }
 
                         TextField {
@@ -762,7 +849,8 @@ Panel {
                             trimmedText === "" || trimmedText === "0"
                               || Model.parseThreshold(trimmedText) > 0
 
-                          anchors.right: parent.right
+                          anchors.right: thresholdSwitch.left
+                          anchors.rightMargin: Style.spacing.sm
                           anchors.verticalCenter: parent.verticalCenter
                           width: Style.space(78)
                           text: savedText
@@ -774,6 +862,9 @@ Panel {
                           font.family: root.fontFamily
                           font.pixelSize: Style.font.bodySmall
                           inputMethodHints: Qt.ImhFormattedNumbersOnly
+                          enabled: thresholdColumn.thresholdAlertsEnabled
+                            && thresholdRow.enabledValue
+                          opacity: enabled ? 1 : 0.45
 
                           onEditingFinished: {
                             if (!thresholdValid) {
@@ -783,6 +874,24 @@ Panel {
                             savedText = trimmedText
                             root.persistSetting(
                               thresholdRow.modelData.key, savedText)
+                          }
+                        }
+
+                        ToggleSwitch {
+                          id: thresholdSwitch
+                          anchors.right: parent.right
+                          anchors.verticalCenter: parent.verticalCenter
+                          checked: thresholdRow.enabledValue
+                          enabled: thresholdColumn.thresholdAlertsEnabled
+                          opacity: enabled ? 1 : 0.45
+                          foreground: root.foreground
+                          accent: root.accent
+                          onToggled: {
+                            thresholdRow.enabledValue =
+                              !thresholdRow.enabledValue
+                            root.persistSetting(
+                              thresholdRow.modelData.enabledKey,
+                              thresholdRow.enabledValue)
                           }
                         }
                       }

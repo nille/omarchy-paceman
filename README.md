@@ -48,12 +48,17 @@ Three independent notification sources are available in widget settings:
 - A split is reported at or below its configured `MM:SS` threshold.
 - A run reaches PaceMan's current high-quality criteria.
 
+The bell tool exposes the high-quality toggle, the split-alert master toggle,
+and an individual enable switch for every standard split. Turning a split off
+preserves its configured threshold.
+
 When more than one condition applies to the same split, the widget sends one
 combined notification. The first API snapshot and reconnect snapshots never
 replay alerts for runs that were already active.
 
 Notifications include an action that opens the live Twitch stream when
-available, or the runner's PaceMan profile otherwise.
+available, or the runner's PaceMan profile otherwise. They use the bundled
+Minecraft face icon rather than a generic system icon.
 
 Default thresholds:
 
