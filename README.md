@@ -1,7 +1,7 @@
 # PaceMan for Omarchy
 
 [![Omarchy plugin](https://img.shields.io/badge/Omarchy-plugin-7aa2f7)](https://omarchy.org/)
-[![Version](https://img.shields.io/badge/version-0.2.3-9ece6a)](manifest.json)
+[![Version](https://img.shields.io/badge/version-1.0.0-9ece6a)](manifest.json)
 [![License](https://img.shields.io/badge/license-MIT-c0caf5)](LICENSE)
 
 Follow live Minecraft speedrunning (MCSR) Random Seed Glitchless (RSG) paces
@@ -95,6 +95,8 @@ API snapshot and reconnect snapshots never replay already-active runs.
 Notifications use the bundled Minecraft face icon and include a **Watch
 live** action when a Twitch stream is available. Otherwise, the action opens
 the runner's PaceMan profile.
+
+![Example high-quality PaceMan notification](screenshots/pace-notification.png)
 
 ## Favorites
 
