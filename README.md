@@ -1,14 +1,31 @@
 # PaceMan for Omarchy
 
-Follow live Minecraft RSG speedrunning paces from [PaceMan.gg](https://paceman.gg/)
-without leaving the Omarchy bar.
+[![Omarchy plugin](https://img.shields.io/badge/Omarchy-plugin-7aa2f7)](https://omarchy.org/)
+[![Version](https://img.shields.io/badge/version-0.2.3-9ece6a)](manifest.json)
+[![License](https://img.shields.io/badge/license-MIT-c0caf5)](LICENSE)
 
-The bar uses a compact Minecraft icon, with active-run details in its tooltip
-and panel. Qualifying rows use bold text and carry an explicit `★ HIGH QUALITY`
-marker in the active theme's foreground color. Open the panel for the global
-pace board, completed
-splits, estimated current times, Twitch links, version/streaming filters, and
-favorite runners.
+Follow live Minecraft RSG speedrunning paces from
+[PaceMan.gg](https://paceman.gg/) directly from the Omarchy bar.
+
+![PaceMan live pace board](preview.png)
+
+PaceMan adds a compact Minecraft icon to the bar. Open it for the global pace
+board, current splits, estimated elapsed times, Twitch links, favorites, and
+actionable pace notifications. The interface uses Omarchy's active colors,
+spacing, typography, controls, and panel behavior.
+
+## Features
+
+- Live standard RSG paces from PaceMan's public liveruns feed
+- Minecraft version, Twitch streaming, and favorite-runner filters
+- PaceMan high-quality markers without hard-coded badge colors
+- Expandable completed-split history for every active run
+- Persistent favorite runners with add, remove, and row-star actions
+- Favorite-start, high-quality, and configurable split notifications
+- Per-split enable switches and editable `MM:SS` thresholds
+- Notification actions that open Twitch or the runner's PaceMan profile
+- Stale/offline state, retry backoff, and cross-display alert deduplication
+- Full mouse and keyboard operation
 
 ## Install
 
@@ -16,87 +33,148 @@ favorite runners.
 omarchy plugin add https://github.com/nille/omarchy-paceman --enable
 ```
 
-Without `--enable`, add it through **Omarchy menu -> Bar -> Widgets** or run:
+Without `--enable`, add PaceMan later through **Omarchy menu -> Bar ->
+Widgets**, or run:
 
 ```bash
 omarchy plugin enable nille.paceman --section right
 ```
 
-There is no build step, account login, API key, helper daemon, or extra package.
-The widget reads PaceMan's public liveruns endpoint directly from QML.
+The plugin has no build step, API key, account login, helper daemon, or extra
+package dependency. It uses facilities already included with Omarchy.
 
-## Use
+## Controls
 
-- Left-click the bar counter to open or close the pace board.
-- Middle-click to refresh immediately.
-- Right-click to open PaceMan.gg.
-- Click the freshness text to set the automatic refresh interval
-  (`2–60` seconds), or use the widget settings.
-- Use the bell tool to edit notification thresholds for every standard split.
-- Use the header star tool to enable or disable favorite-runner alerts, add
-  usernames manually, review the complete favorites list, and remove runners.
-- Click a run to expand its splits; double-click or use the external-link action
-  to open its Twitch stream or PaceMan profile.
-- Collapse expanded run details with the close action in its header.
-- Star a runner to persist them as a favorite.
-- Keyboard navigation supports `j`/`k`, `Enter`, `f` to favorite, `o` to open,
-  `r` to refresh, and `Esc` to close.
+| Action | Result |
+| --- | --- |
+| Left-click the bar icon | Open or close the pace board |
+| Middle-click the bar icon | Refresh immediately |
+| Right-click the bar icon | Open PaceMan.gg |
+| Click a run | Expand or collapse its completed splits |
+| Click a runner star | Add or remove that runner from favorites |
+| Click the external-link action | Open Twitch or the PaceMan profile |
+| Click the freshness text | Change the `2-60` second refresh interval |
+| Click the header star | Manage favorite runners and their alerts |
+| Click the header bell | Configure quality and split notifications |
+
+Keyboard navigation supports `j`/`k`, `Enter`, `f` to favorite, `o` to open,
+`r` to refresh, and `Esc` to close.
 
 ## Notifications
 
-Three independent notification sources are available in widget settings:
+![PaceMan notification controls](screenshots/notification-controls.png)
 
-- A favorite runner starts a newly reported run.
-- A split is reported at or below its configured `MM:SS` threshold.
-- A run reaches PaceMan's current high-quality criteria.
+Fresh installations start with a conservative notification policy:
 
-By default, notifications are limited to runners currently streaming on
-Twitch, and only high-quality pace alerts are enabled. Favorite and split
-alerts default off.
+| Setting | Default |
+| --- | --- |
+| Streaming runners only | On |
+| High-quality pace alerts | On |
+| Favorite runner alerts | Off |
+| Split threshold alerts | Off |
+| Individual split alerts | Off |
 
-The bell tool exposes the high-quality toggle, the split-alert master toggle,
-and an individual enable switch for every standard split. Turning a split off
-preserves its configured threshold.
+The threshold values remain populated when alerts are disabled, so users can
+turn on only the splits they care about:
 
-Enable **Streaming runners only** in the bell menu to suppress every alert
-from runners PaceMan does not currently report as streaming on Twitch.
-
-When more than one condition applies to the same split, the widget sends one
-combined notification. The first API snapshot and reconnect snapshots never
-replay alerts for runs that were already active.
-
-Notifications include an action that opens the live Twitch stream when
-available, or the runner's PaceMan profile otherwise. They use the bundled
-Minecraft face icon rather than a generic system icon.
-
-Default thresholds:
-
-| Split | Time |
+| Split | Default threshold |
 | --- | ---: |
-| Enter Nether | 02:00 |
-| Enter Bastion | 04:30 |
-| Enter Fortress | 04:30 |
-| First Portal | 06:00 |
-| Second Portal | 07:00 |
-| Enter Stronghold | 07:30 |
-| Enter End | 08:00 |
-| Finish | 10:00 |
+| Enter Nether | `02:00` |
+| Enter Bastion | `04:30` |
+| Enter Fortress | `04:30` |
+| First Portal | `06:00` |
+| Second Portal | `07:00` |
+| Enter Stronghold | `07:30` |
+| Enter End | `08:00` |
+| Finish | `10:00` |
 
-Blank or `0` disables an individual threshold.
+Blank or `0` disables an individual threshold. When several alert conditions
+apply to the same split, PaceMan sends one combined notification. The first
+API snapshot and reconnect snapshots never replay already-active runs.
+
+Notifications use the bundled Minecraft face icon and include a **Watch
+live** action when a Twitch stream is available. Otherwise, the action opens
+the runner's PaceMan profile.
+
+## Favorites
+
+Open the header star to:
+
+- enable or disable favorite-runner start notifications;
+- add a Minecraft username directly;
+- review the complete persisted favorites list; and
+- remove runners that are no longer relevant.
+
+Stars on active run rows update the same list. Favorites are matched
+case-insensitively and pinned above the remaining pace board.
+
+## Data and privacy
+
+The plugin polls PaceMan's public standard RSG liveruns endpoint every 15
+seconds by default. It does not request or store Minecraft credentials,
+Microsoft authentication, PaceMan tracker access keys, or Twitch tokens.
+
+Configuration is stored by Omarchy in the widget entry inside
+`~/.config/omarchy/shell.json`. Notification deduplication uses short-lived
+files below `$XDG_RUNTIME_DIR`.
+
+All Advancements runs use a separate PaceMan feed and are outside this
+plugin's current scope.
+
+## Uninstall
+
+To disable PaceMan without deleting its checkout:
+
+```bash
+omarchy plugin disable nille.paceman
+```
+
+To remove the plugin completely:
+
+```bash
+omarchy plugin remove nille.paceman
+```
+
+The remove command asks for confirmation. No cleanup script is required:
+Omarchy removes the plugin checkout and its bar entry, while short-lived
+notification deduplication files disappear with the user session.
 
 ## Development
 
+Validate the manifest and run the pure QML test suite:
+
 ```bash
-QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input tests/qml
+omarchy plugin validate .
+QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME= \
+  /usr/lib/qt6/bin/qmltestrunner -input tests/qml
+```
+
+Launch the standalone live-data harness:
+
+```bash
 tests/harness/run
 ```
 
-`Model.js` contains the pure API, sorting, formatting, favorites, and alert
-logic. `Panel.qml` owns transport and rendering. The harness uses live PaceMan
-data but disables desktop notifications.
+`Model.js` contains parsing, sorting, formatting, favorites, threshold, and
+alert-transition logic. `Panel.qml` owns network transport, persistence,
+interaction, and rendering. Harness notifications are disabled.
 
-## Privacy and scope
+## Troubleshooting
 
-The plugin sends no Minecraft credentials and does not use PaceMan tracker
-access keys. It only reads public PaceMan RSG data. All Advancements runs use a
-separate PaceMan feed and are not included in this version.
+- **No runs appear:** clear the streaming/favorites filters, try **All**
+  versions, and click refresh.
+- **The panel shows stale data:** PaceMan may be unavailable; the last valid
+  board remains visible while retries use bounded backoff.
+- **A notification does not appear:** check the streaming-only gate, the
+  relevant alert master, and the individual split switch.
+- **A change does not reload during development:** run
+  `omarchy-shell shell rescanPlugins` or `omarchy restart shell`.
+
+## Acknowledgements
+
+Data is provided by [PaceMan.gg](https://paceman.gg/). Pace classification
+follows PaceMan's public live-run data and current high-quality criteria.
+
+This is an independent community plugin. It is not affiliated with or
+endorsed by PaceMan, Mojang Studios, Microsoft, or Twitch. Minecraft is a
+trademark of Microsoft Corporation.
