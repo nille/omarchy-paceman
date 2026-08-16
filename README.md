@@ -4,8 +4,8 @@
 [![Version](https://img.shields.io/badge/version-0.2.3-9ece6a)](manifest.json)
 [![License](https://img.shields.io/badge/license-MIT-c0caf5)](LICENSE)
 
-Follow live Minecraft RSG speedrunning paces from
-[PaceMan.gg](https://paceman.gg/) directly from the Omarchy bar.
+Follow live Minecraft speedrunning (MCSR) Random Seed Glitchless (RSG) paces
+from [PaceMan.gg](https://paceman.gg/) directly from the Omarchy bar.
 
 ![PaceMan live pace board](preview.png)
 
@@ -16,7 +16,7 @@ spacing, typography, controls, and panel behavior.
 
 ## Features
 
-- Live standard RSG paces from PaceMan's public liveruns feed
+- Live MCSR standard RSG paces from PaceMan's public liveruns feed
 - Minecraft version, Twitch streaming, and favorite-runner filters
 - PaceMan high-quality markers without hard-coded badge colors
 - Expandable completed-split history for every active run
@@ -111,7 +111,9 @@ case-insensitively and pinned above the remaining pace board.
 ## Data and privacy
 
 The plugin polls PaceMan's public standard RSG liveruns endpoint every 15
-seconds by default. It does not request or store Minecraft credentials,
+seconds by default. In this context, **MCSR** is the broader Minecraft
+speedrunning ecosystem, while **RSG** is the specific run category exposed by
+this feed. The plugin does not request or store Minecraft credentials,
 Microsoft authentication, PaceMan tracker access keys, or Twitch tokens.
 
 Configuration is stored by Omarchy in the widget entry inside
